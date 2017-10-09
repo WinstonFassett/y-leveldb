@@ -2,6 +2,8 @@
 'use strict'
 var levelup = require('levelup')
 var sublevel = require('level-sublevel')
+var LiveStream = require('level-live-stream')
+var memdown = require('memdown')
 
 var idTemplate = '0000000000' // Length of 10 (Remember |2^32| == 10)
 var levelOptions = {
@@ -112,10 +114,10 @@ function extend (Y, rootDb) {
         })
       }
       * findNext (id) {
-        return yield* this.findWithLowerBound([id[0], id[1] + 1])
+        return yield * this.findWithLowerBound([id[0], id[1] + 1])
       }
       * findPrev (id) {
-        return yield* this.findWithUpperBound([id[0], id[1] - 1])
+        return yield * this.findWithUpperBound([id[0], id[1] - 1])
       }
       * iterate (t, start, end, gen) {
         var conf = {
@@ -143,13 +145,13 @@ function extend (Y, rootDb) {
         })
 
         for (var i = 0; i < res.length; i++) {
-          yield* gen.call(t, res[i])
+          yield * gen.call(t, res[i])
         }
       }
       * flush () {}
       * logTable () {
         console.log('-- Start logging db content --')
-        yield* this.iterate(this, null, null, function * (o) {
+        yield * this.iterate(this, null, null, function * (o) {
           console.log(o.id, o)
         })
         console.log('-- End logging -- ')
@@ -173,18 +175,18 @@ function extend (Y, rootDb) {
           if (!dontCopy) {
             this.buffer.push(this._copyTo.put(v))
           }
-          yield* super.put(v)
+          yield * super.put(v)
         }
         * delete (id) {
           this.buffer.push(this._copyTo.delete(id))
-          yield* super.delete(id)
+          yield * super.delete(id)
         }
         * flush () {
-          yield* super.flush()
+          yield * super.flush()
           for (var i = 0; i < this.buffer.length; i++) {
-            yield* this.buffer[i]
+            yield * this.buffer[i]
           }
-          yield* this._copyTo.flush()
+          yield * this._copyTo.flush()
         }
       }
       return Clone
@@ -219,18 +221,41 @@ function extend (Y, rootDb) {
           }
         }
         options.dir = options.dir || '.'
-        var dbpath = path.join(options.dir, options.namespace)
-        this.os = this.ds = this.ss = null
-        this.os = this.db.sublevel('os', levelOptions)
-        this.db = rootDb.sublevel(options.namespace) // sublevel(levelup(dbpath)) // level options?
+        this.db = rootLevel.sublevel(options.namespace)
         this.ds = this.db.sublevel('ds', levelOptions)
         this.ss = this.db.sublevel('ss', levelOptions)
-        this.ready = new Promise(function (resolve) {         
-          resolve()
+        // os here is actually an in-memory cache using memdown
+        this.os = levelup(options.namespace + '/os', Object.assign({}, levelOptions, { db: memdown }))
+        // os_store is the actual levelup database for the os
+        this.os_store = this.db.sublevel('os', levelOptions)
+        // read os_store into os then install live stream
+        var connect_os_store = new Promise((resolve, reject) => {
+          this.os_store.readStream()
+            .on('data', data => {
+              this.os.put(data.key, data.value)
+            })
+            .on('end', () => {
+              // live sync memory db to DB              
+              LiveStream.install(this.os)
+              this.os.liveStream({ old: false })
+                .on('data', (data) => {
+                  if (data.type === 'put') {
+                    this.os_store.put(data.key, data.value)
+                  } else if (data.type === 'del') {
+                    this.os_store.del(data.key)
+                  } else {
+                    console.warn('UNKNOWN TYPE', data.type)
+                  }
+                })
+              resolve(true)
+            })
         })
+        this.ready = Promise.all([
+          connect_os_store
+        ])
       }
       * operationAdded (transaction, op) {
-        yield* super.operationAdded(transaction, op)
+        yield * super.operationAdded(transaction, op)
       }
       transact (makeGen) {
         var store = this
