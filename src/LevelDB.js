@@ -40,7 +40,10 @@ var levelOptions = {
 }
 var leveldown = require('leveldown')
 
-function extend (Y) {
+function extend (Y, rootDb) {
+  if (!rootDb) {
+    throw new Error('y-levelup must be initialized with a LevelUp database!')
+  }
   Y.requestModules(['memory']).then(function () {
     class Store {
       constructor (db) {
