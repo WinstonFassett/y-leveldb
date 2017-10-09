@@ -286,7 +286,7 @@ function extend (Y) {
         this.db.close()
       }
     }
-    Y.extend('leveldb', OperationStore)
+    Y.extend('levelup', OperationStore)
   })
 }
 
