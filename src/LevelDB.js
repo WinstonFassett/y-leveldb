@@ -221,8 +221,8 @@ function extend (Y, rootDb) {
         options.dir = options.dir || '.'
         var dbpath = path.join(options.dir, options.namespace)
         this.os = this.ds = this.ss = null
-        this.db = sublevel(levelup(dbpath))
         this.os = this.db.sublevel('os', levelOptions)
+        this.db = rootDb.sublevel(options.namespace) // sublevel(levelup(dbpath)) // level options?
         this.ds = this.db.sublevel('ds', levelOptions)
         this.ss = this.db.sublevel('ss', levelOptions)
         this.ready = new Promise(function (resolve) {         
