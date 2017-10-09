@@ -1,29 +1,26 @@
-# LevelDB database adapter for [Yjs](https://github.com/y-js/yjs)
+# LevelUp database adapter for [Yjs](https://github.com/y-js/yjs)
 
-Use the LevelDB database adapter to store your shared data persistently in NodeJs applications. The changes will persist after restart.
+Use the levelup database adapter to store your shared data persistently in NodeJs applications. The changes will persist after restart.
 
-## Use it!
-Install this with bower or npm.
+Works with any LevelUp backend
+https://github.com/Level/levelup/wiki/Modules#storage
+https://github.com/Level/awesome
 
-##### Bower
-```
-bower install y-leveldb --save
-```
-
-##### NPM
-```
-npm install y-leveldb --save
-```
 
 ### Example
 
 ```
+
+// create levelup root database
+var db = require('levelup')(process.env.MONGODB_URI || 'localhost/yjs-rooms', { db: require('mongodown') })
+// initialize y-levelup
+require('y-levelup')(Y, db)
+
+// create Y instance
 Y({
   db: {
-    name: 'leveldb',
+    name: 'levelup',
     namespace: 'textarea-example' (optional - defaults to connector.room),
-    dir: './db' // where the database is created,
-    cleanStart: false // (if true, overwrite existing content - great for debugging)
   },
   connector: {
     name: 'websockets-client', // use the websockets connector
