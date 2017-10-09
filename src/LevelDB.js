@@ -20,7 +20,7 @@ var levelOptions = {
         num = idTemplate.slice(num.length) + num
         return JSON.stringify([val[0], num])
       } else {
-        throw new Error('The LevelDB connector does not support keys with a length greater than 2!')
+        throw new Error('The levelup connector does not support keys with a length greater than 2!')
       }
     },
     decode: function (val) {

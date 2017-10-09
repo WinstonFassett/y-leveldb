@@ -7,8 +7,8 @@ var runSequence = require('run-sequence').use(gulp)
 require('../yjs/gulpfile.helper.js')(gulp, {
   polyfills: [],
   entry: './src/LevelDB.js',
-  targetName: 'y-leveldb.js',
-  moduleName: 'yLeveldb',
+  targetName: 'y-levelup.js',
+  moduleName: 'yLevelup',
   specs: []
 })
 
