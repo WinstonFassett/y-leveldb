@@ -57,7 +57,10 @@
   },
   "dependencies": {
     "level": "^1.4.0",
+    "levelup": "0.19.1",
+    "level-live-stream": "1.4.12",
     "level-sublevel": "^6.5.4",
+    "memdown": "1.2.4",    
     "mkdirp": "^0.5.1"
   }
 }
