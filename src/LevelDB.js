@@ -44,6 +44,7 @@ function extend (Y, rootDb) {
   if (!rootDb) {
     throw new Error('y-levelup must be initialized with a LevelUp database!')
   }
+  var rootLevel = sublevel(rootDb)
   Y.requestModules(['memory']).then(function () {
     class Store {
       constructor (db) {
