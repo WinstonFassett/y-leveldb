@@ -2,8 +2,6 @@
 'use strict'
 var levelup = require('levelup')
 var sublevel = require('level-sublevel')
-var path = require('path')
-var mkdirp = require('mkdirp')
 
 var idTemplate = '0000000000' // Length of 10 (Remember |2^32| == 10)
 var levelOptions = {
@@ -38,7 +36,6 @@ var levelOptions = {
     type: 'IdEncoding'
   }
 }
-var leveldown = require('leveldown')
 
 function extend (Y, rootDb) {
   if (!rootDb) {
@@ -223,26 +220,13 @@ function extend (Y, rootDb) {
         }
         options.dir = options.dir || '.'
         var dbpath = path.join(options.dir, options.namespace)
-        this.ready = new Promise(function (resolve) {
-          mkdirp(dbpath, function (err) {
-            if (err) throw err
-            else resolve()
-          })
-        }).then(function () {
-          return new Promise(function (resolve) {
-            if (options.cleanStart) {
-              leveldown.destroy(dbpath, resolve)
-            } else {
-              resolve()
-            }
-          })
-        })
         this.os = this.ds = this.ss = null
-        this.ready.then(() => {
-          this.db = sublevel(levelup(dbpath))
-          this.os = this.db.sublevel('os', levelOptions)
-          this.ds = this.db.sublevel('ds', levelOptions)
-          this.ss = this.db.sublevel('ss', levelOptions)
+        this.db = sublevel(levelup(dbpath))
+        this.os = this.db.sublevel('os', levelOptions)
+        this.ds = this.db.sublevel('ds', levelOptions)
+        this.ss = this.db.sublevel('ss', levelOptions)
+        this.ready = new Promise(function (resolve) {         
+          resolve()
         })
       }
       * operationAdded (transaction, op) {
