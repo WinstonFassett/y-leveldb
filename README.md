@@ -2,11 +2,12 @@
 
 Use the levelup database adapter to store your shared data persistently in NodeJs applications. The changes will persist after restart.
 
-Works with any levelup backend.  
+## Works with any levelup backend.  
 
-For more info:
-https://github.com/Level/levelup/wiki/Modules#storage
-https://github.com/Level/awesome
+For more info see:
+
+* https://github.com/Level/levelup/wiki/Modules#storage
+* https://github.com/Level/awesome
 
 ## How it works
 
