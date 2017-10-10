@@ -1,22 +1,44 @@
-# LevelUp database adapter for [Yjs](https://github.com/y-js/yjs)
+# levelup database adapter for [Yjs](https://github.com/y-js/yjs)
 
 Use the levelup database adapter to store your shared data persistently in NodeJs applications. The changes will persist after restart.
 
-Works with any LevelUp backend
+Works with any levelup backend.  
+
+For more info:
 https://github.com/Level/levelup/wiki/Modules#storage
 https://github.com/Level/awesome
 
+## How it works
 
-### Example
+This is a fork of y-leveldb, which uses leveldown to store data in the filesystem.
 
+In order to support remote databases via levelup, a couple of changes have been made:
+
+* Rather than creating a DB per room, use a single database for all rooms and implement rooms as sublevels.
+* For optimal room startup, run the OS as an in-memory database whose operations are also streamed to the remote database.
+
+### Caveats
+
+* This was an experiment that has turned out to work pretty well.
+* so YMMV.
+* This is just source code adapted from its original app. 
+* I haven't worked out the YJS build system yet so there is no dist or NPM package.
+* SS and DS are not run in-memory as OS is.  It might be worth exploring.
+
+## Example
+
+### 1.  Create/connect to levelup root database
+```
+var db = require('levelup')(process.env.MONGODB_URI || 'localhost/yjs-rooms', { db: require('mongodown') })
 ```
 
-// create levelup root database
-var db = require('levelup')(process.env.MONGODB_URI || 'localhost/yjs-rooms', { db: require('mongodown') })
-// initialize y-levelup
+### 2.  Initialize y-levelup with database
+```
 require('y-levelup')(Y, db)
+```
 
-// create Y instance
+### 3.  Create Y instance
+```
 Y({
   db: {
     name: 'levelup',
